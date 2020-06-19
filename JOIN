@@ -1,0 +1,90 @@
+/*
+
+    JOIN
+    두개 이상의 테이블을 연결해서 데이터를 검색하는 방법이다.
+     보통 두개이상의 행(row)들의 공통된 값 primary key(기본 키), Foreign Key(외래 키) 값을 사용해서 조인한다
+     
+        
+    Primary Key(기본 키) : 테이블에서 중복되지 않는 키
+    Foreign Key(외래 키) : 다른 테이블에서 PK, UK 인 경우가 많다.
+    
+    inner JOIN : 교집합
+    full outer JOIN   
+    cross JOIN
+    outer
+        Left   ***
+        Right   ***
+    self JOIN : 같은 테이블 데이터를 산출하기 위해서 JOIN  *****
+*/
+
+-- inner JOIN
+-- Ansi SQL
+
+--Oracle
+
+select e.employee_id, e.first_name ,
+       e.department_id , d.department_id ,
+       d.department_name
+
+from employees e inner join departments d on e.department_id = d.department_id;
+
+
+
+--Oracle
+select employee_id , first_name, e.department_id , d.department_id, d.department_name , d.location_id
+
+from employees e, departments d
+where e.department_id = d.department_id
+    and e.first_name = 'Adam';
+    
+    --ansi
+    -- cross join
+    select e.employee_id , e.first_name,
+    e.department_id , d.department_id,
+    d.department_name
+    from employees e cross join departments d ;
+    
+  --oracle  
+     select e.employee_id , e.first_name,
+    e.department_id , d.department_id,
+    d.department_name
+    from employees e , departments d ;
+    
+    --full outer join
+    
+    select e.employee_id , e.first_name,
+        e.department_id , d.department_id
+    from employees e full outer join DEPARTMENTS d
+        on e.department_id= d.department_id;
+        
+--outer join
+-- left , right
+--ansi
+select e.employee_id , e.first_name,
+        e.department_id  , d.department_id,
+        d.department_name
+from employees e left outer join departments d on e.department_id = d.department_id;
+
+
+--oracle
+select e.employee_id , e.first_name,
+        e.department_id  , d.department_id,
+        d.department_name
+from employees e, departments d 
+where e.department_id = d.department_id(+);
+
+--self join : 동일한 테이블 JOIN
+select  a.employee_id , a.first_name,
+        a.manager_id , b.employee_id,
+        b.first_name
+from employees  a, employees b    -- a: 사원 b : 상사
+where a.manager_id = b.employee_id;
+
+--계층형 구조 오름 , 내림
+select a.employee_id , a.first_name as "사원" ,
+        a.manager_id as "사원의 상사" , b.employee_id,
+        b.first_name as "상사"
+from employees a, employees b
+where a.manager_id= b.employee_id(+)
+--connect by prior a.manager_id = a.employee_id;
+connect by  a.manager_id =prior a.employee_id;
