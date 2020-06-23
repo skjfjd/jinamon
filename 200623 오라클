@@ -1,0 +1,341 @@
+--문제1) EMPLOYEES 테이블에서 Kochhar의 급여보다 많은 사원의 정보를 사원
+--번호,이름,담당업무,급여를 출력하라.
+
+select employee_id , last_name ,job_id ,salary
+from employees
+where salary >(select salary
+            from employees
+            where last_name = 'Kochhar');
+            
+--문제2) EMPLOYEES 테이블에서 급여의 평균보다 적은 사원의 정보를 사원번호,
+--이름,담당업무,급여,부서번호를 출력하여라.
+
+select employee_id , last_name ,job_id ,salary , department_id
+from employees
+where salary < (select avg(salary)
+                    from employees); 
+
+--문제3) EMPLOYEES 테이블에서 100번 부서의 최소 급여보다 최소 급여가
+--많은 다른 모든 부서를 출력하라
+
+select department_id , min(salary)
+from employees
+group by department_id
+having min(salary) > (select min(salary)
+                    from employees
+                    where department_id=100);
+                    
+--문제4) 업무별로 최소 급여를 받는 사원의 정보를 사원번호,이름,업무,부서번호
+--를 출력하여라. 단 업무별로 정렬하여라.
+
+select employee_id , last_name ,job_id , salary , department_id
+from employees
+where (job_id , salary)  in ( select job_id , min(salary)
+                                from employees
+                                group by job_id)
+                                order by job_id;
+                                
+ --문제5) EMPLOYEES 과 DEPARTMENTS 테이블에서 업무가 세일드맨 사원의 정
+--보를 이름,업무,부서명,근무지를 출력하라.                               
+   
+select  e.last_name , e. job_id , d.department_name , d.location_id
+from  employees e , departments d
+ where e.department_id = d.department_id
+          and job_id = 'SA_MAN';
+   
+--문제6) EMPLOYEES 테이블에서 가장 많은 사원을 갖는 MANAGER의
+--사원번호를 출력하라.   
+   
+select manager_id
+from employees
+group by manager_id
+having count(*) = (select max(count(*))
+                    from employees
+                    
+                    
+                    group by manager_id);
+                    
+
+/////
+
+-- Sub Query
+-- Query 안의 Query
+-- 한개의 행(row) 에서 결과 값이 반환되는 Query
+/*
+      SELECT 단일 ROW 단일 COLUMN (산출되는 데이터가 한개) , 컬럼도 한개)
+      FROM   다중 ROW 다중 COLUMN 
+      WHERE  다중 ROW 다중 COLUMN 
+*/
+    
+--SELECT    
+
+select  employee_id , first_name,
+    (select salary    -- salary  밖에 안됨  단일 row 기능 밖에 안됨
+    from employees
+    where employee_id = 100)  --데이터도 하나
+   -- (select count(*) from employees)
+from employees;
+    
+-- FROM 다중 ROW 다중 COLUMN\
+
+select employee_id , first_name  , last_name
+from(select *
+     from employees
+     where department_id= 20);
+    
+-- 부서번호 20번 , 급여 6000 이상인 사원 
+
+select *
+from employees
+where department_id = 50
+and salary >=6000;
+
+
+SELECT e.employee_id , e.salary
+   
+FROM (select employee_id , salary 
+    from employees
+    where department_id =50) e
+where salary >=6000;    
+    
+-- 급여의 합계 , 인원수 ,사원명 , 월급
+/*
+select job_id , first_name ,count(*)
+from employees                      --에러 산출   그룹 함수 떄문
+group by job_id;
+  */  
+   
+select e.employee_id , e.salary , e.job_id ,j.job_id,
+        j."급여 합계" , j."인원수"  --앨리어스로 산출 가능 j."급여 합계" , j."인원수"
+from employees e ,
+(select job_id , sum(salary) as "급여 합계" , count(*) "인원수"
+from employees
+group by job_id) j
+where e.job_id = j.job_id;
+
+--where 절
+
+select first_name , salary
+from  employees
+where salary > (select avg(salary)
+                    from employees);
+                    
+-- department_id(부서번호) 90번  job_id만 산출    
+
+select job_id , first_name ,department_id
+from employees
+where job_id in(select job_id from employees where department_id = 90);  
+
+
+-- 부서별로 가장 급여를 적게 받는 사원과 같은 급여를 받는 사원 
+SELECT first_name , salary , department_id
+    
+FROM employees
+where salary in(select min(salary)
+                from employees
+                group by department_id)
+order by department_id;
+
+
+-- 부서별로 가장 급여를 적게 받는 사원과  급여
+
+SELECT
+     department_id , first_name , salary
+FROM employees
+where (department_id , salary) in (select department_id , min(salary)
+                                    from employees
+                                    group by department_id)
+order by department_id asc;
+
+////
+
+-- 특수 Query
+-- CASE DECODE - SWITCH
+select employee_id, first_name ,  phone_number,
+    case substr(phone_number , 1,3)
+    when '515' then '서울'
+    when '590' then '부산'
+    when '659' then '광주'
+    when '603' then '대전'
+    else '기타'
+    end as "지역"
+from  employees; 
+
+SELECT employee_id , first_name , phone_number,
+case
+    when substr(phone_number ,1,3) = '515' then '서울'
+    when substr(phone_number ,1,3) = '590' then '부산'
+    when substr(phone_number ,1,3) = '659' then '광주'
+    when substr(phone_number ,1,3) = '603' then '대전'
+    else '기타'
+    end as "지역"
+FROM employees;
+
+
+-- DECODE
+
+select employee_id , first_name , phone_number,
+    decode(substr(phone_number, 1 ,3),
+        '515', '서울',
+        '590', '부산',
+        '659', '광주',
+        '603', '대전',
+        '기타') as "지역"
+            
+from employees;
+
+/*
+        집합
+        합집합 : UNION
+        교집합 : INTERSECT
+        차집합 : MINUS
+*/
+
+--UNION
+
+select JOB_ID
+from employees
+where job_id in ('AD_VP' , 'FI_ACCOUNT')
+union all
+SELECT job_id
+   
+FROM jobs
+where job_id in('AD_VP' , 'FI_ACCOUNT');
+
+--INTERSECT
+
+SELECT employee_id    
+FROM employees
+intersect
+select manager_id
+from employees;
+
+--JOIN
+
+select distinct b.employee_id
+from employees a , employees b
+where a.manager_id = b.employee_id;
+
+
+--minus
+-- 매니저가 아닌 사원
+select employee_id
+from employees
+minus
+select manager_id
+from employees;
+
+-- 차집합을 join
+
+select e.first_name , d.department_id , e.department_id
+from employees e , departments d
+where e.department_id = d.department_id(+)
+  and e.department_id is null;
+  
+--OVER() 함수
+-- SELECT 절에서만 사용 가능
+-- GROUP BY 를 보강하기 위해서 나온 함수
+
+SELECT  department_id , count(*)
+from employees;
+
+
+
+SELECT  department_id , count(*)
+from employees
+group by department_id;
+
+
+SELECT  department_id , count(*)over()
+from employees;
+
+
+
+SELECT first_name,  department_id , count(distinct department_id)oveR()
+from employees;
+
+--partition by == group by
+
+select department_name,
+    count(*)over(partition by department_id)
+from departments;
+
+
+select department_id , first_name , salary,
+    count(*)over(partition by department_id)
+from employees;
+
+--count(*)over() : 전체 행수를 반환
+--count(*)over(partition by 컬럼) : 컬럼을 그룹을 나누어 row의 수를 반환
+
+--분석 함수
+
+/*
+    RANK()          1 2 3 3 5 6
+    DENSE_RANK()    1 2 3 3 4 5  
+    ROW_NUMBER()    1 2 3 4 5 6 
+    ROWNUM
+    
+    --EMPLOYEES > 월급 TOP10
+    
+*/
+
+select employee_id , first_name
+from employees
+where employee_id >= 100 and employee_id <=109;
+
+
+select first_name , salary,
+        rank()over(order by salary desc )as Rank , 
+        dense_rank()over(order by salary desc) as dense_rank,
+        row_number()over(order by salary desc) as row_number
+from employees;
+
+
+--rownum
+select rownum, employee_id , first_name
+from employees
+where rownum > 10  and rownum <=20 ;
+
+
+-- 1. data  설정 (급여 순위)  = 정렬
+-- 2. rownum 설정
+-- 3. 범위를 설정
+
+select rnum ,employee_id , first_name , salary --3
+from(select rownum as rnum , employee_id , first_name , salary --2
+from(select employee_id , first_name , salary   -- 1
+from employees
+order by salary desc)
+ )
+ where rnum > 0 and rnum <=10;
+ 
+ 
+ /*
+ select 절
+    select 컬럼 , 표준함수 , 그룹함수 ,  sub Query , over() partition by
+    from 테이블 , sub Query
+    [where] 조건  in , and , any , all , like  < > <= >=  <> !=  = sub Query
+    [group by] 컬럼
+    [having] 그룹핑의 조건
+    [order by] 정렬할 컬럼  asc , desc
+    [start by] 계층형
+    [connect by ] 연결형 prior(상향 , 하향)
+    
+    JOIN
+    
+    INNER
+    FULL OUTER
+    CROSS
+    OUTER(LEFT , RIGHT)
+    SELF
+ 
+ */
+
+
+
+
+
+
+
+ 
