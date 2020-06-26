@@ -1,0 +1,301 @@
+/*   PL
+    PL/SQL
+  PL  Procedural == 처리자: Extenstion
+    Process > Procedure
+    
+    SQL을 확장한 순차적 언어 > Procedure  , Function , Trigger
+                            in out        in out 
+                            insert        select          
+                            delete
+                            update
+        +Script
+*/
+/*
+        Script 구조
+        1. 선언부 : 변수 , 상수 , 초기화
+        2. 실행부 : 실제로 처리할 Query 부분이나 제어문을 활용해서 처리하는 부분
+        3. 예외처리부: 각종 오류 처리
+
+*/
+    
+SET SERVEROUTPUT ON    --CONSOLE에 출력을 ON
+
+BEGIN
+    --실행부
+    DBMS_OUTPUT.PUT_LINE('Hello PL');
+END;
+/
+SET SERVEROUTPUT off
+
+DECLARE    --선언부
+    message VARCHAR2(10);       --String message
+BEGIN      --실행부
+        message := 'hello pl';    
+        
+        
+        SYS.dbms_output.put_line('message = '  || message);
+        
+        --예외 처리
+END;
+/
+
+--if
+
+DECLARE
+    counter INTEGER;   
+begin
+    counter := 1;
+    counter := counter + 1;
+    
+    if counter is null then
+        dbms_output.put_line('result : counter is null');
+    else 
+         dbms_output.put_line('result : counter is not null');
+     end if;
+end;
+/
+
+declare
+        counter INTEGER;
+        i INTEGER;
+begin
+    
+        for i in 1..9 loop
+            dbms_output.put_line('i = ' || i );
+            counter := i*2;
+            dbms_output.put_line('2 * ' || i || ' = ' || counter);
+        end loop;
+        
+end;
+/
+
+--loop
+declare
+
+        v_count number:=0;
+        v_total number:=0;
+
+begin
+    loop
+        exit when v_count = 10;
+        
+        v_count := v_count +1;
+        v_total := v_total +v_count; 
+    end loop;
+
+
+    sys.dbms_output.put_line('v_total = ' || v_total);
+
+end;
+/
+ --while
+declare
+    v_count number :=0;
+begin
+    while v_count <10
+    loop
+        v_count :=v_count +1;
+        sys.dbms_output.put_line('v_count = ' || v_count);
+        end loop;
+end;
+/
+
+--GOTO
+
+declare
+    v_name varchar2(10) := 'Lee';
+    v_case number := 0;
+begin
+    case when mod(v_case , 2) = 0 then
+        GOTO test1;
+        when mod(v_case , 2) = 1 then
+        GOTO test2;
+        else
+        GOTO err;
+     end case;
+     
+    <<test1>>
+            sys.dbms_output.put_line(v_name || 'is woman');
+            GOTO sub_end;
+    <<test2>>
+             sys.dbms_output.put_line(v_name || 'is man');
+             GOTO sub_end;
+    <<err>>
+             sys.dbms_output.put_line('error');
+          
+    <<sub_end>>
+           sys.dbms_output.put_line('Exit');
+       
+             
+end;
+/
+
+-- 예외처리부 1/0
+declare
+    counter INTEGER;
+begin
+    counter :=1;
+    counter := counter/0;
+    
+Exception when others then
+
+    sys.dbms_output.put_line('예외가 발생 하였습니다');
+end;
+/
+
+-- varray
+declare
+    type varray_test is varray(3) of INTEGER ;       --int varray_test = new int[3];
+    vArr varray_test;
+begin
+    vArr := varray_test(11, 22,33);
+    --vArr(0)
+    sys.dbms_output.put_line('vArr(1)' || vArr(1));
+
+end;
+/
+
+accept p_deptno prompt '부서번호를 입력하시오(급여의 합)'
+
+
+declare
+    v_salTotal number;
+begin
+    SELECT sum(salary) into v_salTotal
+        
+    FROM employees
+    where department_id = &p_deptno;
+    sys.dbms_output.put_line(&p_deptno || '번 부서 급여의 합은 '
+    || to_char(v_salTotal, '$999,999,999') );
+    
+end;
+/
+
+--사원번호를 입력받고 그 사원의 급여에 1000을 더한 값으로 갱신(update)하라.
+--사원번호와 갱신된 급여를 출력하라.
+
+accept p_empno prompt '사원번호를 입력하시오'
+
+declare
+        --v_sal number(8,2) := 1000;
+    v_sal employees.salary&type := 1000;
+    v_salTotal number;
+    
+begin
+    -- 확인용
+    select salary into v_salTotal
+    from employees
+    where employee_id = &p_empno;
+
+    SYS.dbms_output.put_line(&p_empno || '번 사원의 급여: ' || v_salTotal);
+    
+    -- Update
+    update employees
+    set salary =salary+ v_sal
+    where employee_id = &p_empno;
+    
+    --확인용
+    select salary into v_salTotal
+    from  employees
+    where employee_id = &p_empno;
+
+
+end;
+/
+
+rollback;
+
+
+//
+/*
+    view : 가상 Table
+    실체가 없는 테이블 , 다른 테이블을 접근하기 위한 테이블
+    
+    
+    Table < --------- View ----------- User
+    한개의 테이블로 여러개의 Table을 검색할 수 있다.
+    속도가 빠르다.
+    제한 설정이 가능하다.  >> readonly
+    
+*/
+create VIEW UB_TEST_01(JOB_ID,JOB_TITLE,MIN_SALARY)
+AS
+SELECT JOB_ID , JOB_TITLE , MIN_SALARY
+FROM JOBS;
+
+
+SELECT
+    *
+FROM UB_TEST_01;  --VIEW 를 통해서 검색
+
+INSERT INTO UB_TEST_01(JOB_ID,JOB_TITLE,MIN_SALARY)
+VALUES('DEVELOPER', '개발자' , 10000);
+
+SELECT
+    *
+FROM JOBS;
+
+
+ROLLBACK;
+COMMIT;
+
+
+CREATE TABLE TB_EMP
+AS
+SELECT employee_id , first_name , salary
+    
+FROM EMPLOYEES;
+
+create view ub_view(
+    employee_id,
+    first_name,
+    salary
+)
+as
+select employee_id , first_name , salary
+from TB_EMP;
+
+
+insert into ub_view
+values(100,'홍길동', 10000);
+
+
+insert into ub_view
+values(101,'일지매', 9000);
+
+select *from tb_emp;
+select *from ub_view;
+
+
+--READONLY
+CREATE OR REPLACE VIEW DEPTVIEW(
+    "부서번호",
+    "부서명",
+    "지역명"
+)
+AS
+SELECT department_id , department_name , location_id
+FROM DEPARTMENTS
+with READ ONLY;
+
+insert into DEPTVIEW("부서번호","부서명","지역명")
+values(280,'기획부','1700');
+
+select *from DEPTVIEW;
+
+create or replace view dept_emp_view(empno , name ,deptno , deptname, loc)
+as
+select e.employee_id , first_name ,d.department_id , d.department_name ,d.location_id
+from employees e , departments d
+where e.department_id = d.department_id
+with read only;
+
+SELECT name ,deptname
+    
+FROM dept_emp_view
+where name = 'Den';
+//
+
+
+
+
