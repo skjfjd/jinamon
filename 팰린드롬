@@ -1,0 +1,51 @@
+package pl;
+
+import java.util.Scanner;
+
+public class PalindromCheck {
+
+	public static void main(String[] args) {
+		
+			
+			
+			// int 타입은 정수 타입 이기 떄문에  인덱스가 없어서  판별하기 힘들어 String 타입을 사용	
+			
+			System.out.print("판별 할 숫자 나  문자를 입력하시오 : ");
+	
+	
+			String n;
+			
+			Scanner sc = new Scanner(System.in);
+			
+			n = sc.next();         
+			
+			
+			int len = n.length();   
+			
+			
+			// flag	는 팰린드롬 이면 그대로 true 값을  출력한다  for 문과 if 문을 통하여
+			// flag 가 false 가 출력이 되면  팰린드롬인지 판별 가능하다
+			boolean flag = true;
+			
+			// len/2 를 하여 어 떤 값을 입력하여도 중간 지점에서 비교를 한다
+			for (int i = 0; i < len/2; i++) {
+				
+				
+				
+				// if 문의 좌항은  0번쨰 인덱스항부터  ++ 하면서 한칸씪 이동 한다
+				// 우항은  끝쪾 인덱스항에서  계속 감소를하면서 내려온다
+				// 두개의 값을 비교하여 서로 한번이라도 다르면 팰린드롬이 되지 못하여,
+				// flag 에 false 를 주어  팰린드롬이 맞는지 아닌지 판별 해준다.
+				if(n.charAt(i) !=n.charAt(len-i-1)) {
+					flag = false;
+				}
+				
+				
+			}
+	
+			System.out.println(flag);
+	
+	
+	}
+
+}
