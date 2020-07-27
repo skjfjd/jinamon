@@ -1,0 +1,167 @@
+maven repository >> jstl  , standard   jar파일 받아야 한다
+
+<%@ page import="java.util.List" %>
+<%@ page import="dto.MemberDto" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %><%--
+  Created by IntelliJ IDEA.
+  User: macbookpro
+  Date: 2020/07/27
+  Time: 11:05 오전
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
+
+<%--
+      jstl.jar , standard.jar
+--%>
+<html>
+  <head>
+    <title>$Title$</title>
+  </head>
+  <body>
+
+  <%--
+        EL:표현식(값, 판별)
+        Core:제어문(for, if) + EL
+
+  --%>
+
+  <%
+    request.setAttribute("data", "JSTL입니다");
+
+  %>
+
+  ${ data }
+  <%--
+  String cdata - "core JSTL 입니다.;
+  request.setAttribute("cdata" , cdata);
+  --%>
+  <!--out(내장 객체)-->
+  <%--
+    out.println(cdata);
+  --%>
+  <!--  core tag-->
+  <c:set var="cdata" value="core JSTL 입니다"/>
+
+  ${ cdata }
+  <br><br>
+
+  <%
+    session.setAttribute("sessionData" , "저장된 데이터");
+  %>
+  <c:set var="sdata" value="${sessionData }"/>
+
+  <c:out value="${sdata }"/>
+  <br><br>
+
+  <!-- if -->
+
+  <%
+    request.setAttribute("count", "10");
+  %>
+
+  <%
+    String scount =(String)request.getAttribute("count");
+    int count = Integer.parseInt(scount);
+
+    if(count>= 10){
+  %>
+  <p>count:<%=count %></p>
+  <%}%>
+
+  <c:if test="${count >=10 }">
+    <p>core count:<c:out value="${count }"></c:out> </p>
+  </c:if>
+
+  <br><br>
+
+  <%
+    request.setAttribute("name" , "길동홍");
+  %>
+
+  <c:if test="${ name eq '길동홍' }">
+    <p>이름은 길동홍 입니다</p>
+  </c:if>
+
+  <%
+    request.setAttribute("name" , "진하송");
+  %>
+
+  <c:if test="${name=='진하송' }" var="flg"></c:if>
+
+  <c:if test="${flg }">
+    <p>이름은 진하송 입니다.</p>
+  </c:if>
+<br>
+
+  <!-- for -->
+
+  <%
+    for (int i = 0; i <10 ; i++) {
+        %>
+        <%=i %>
+   <%
+    }
+  %>
+
+  <br>
+  <c:forEach begin="0" end="9" step="1" varStatus="i">
+    <c:out value="${i.index }"></c:out>
+  </c:forEach>
+
+  <br><br>
+<%
+  List<MemberDto> list = new ArrayList<>();
+
+  MemberDto mem = new MemberDto();
+  mem.setMessage("안녕하세요");
+  list.add(mem);
+
+   mem = new MemberDto();
+  mem.setMessage("건강하세요");
+  list.add(mem);
+
+  mem = new MemberDto();
+  mem.setMessage("성공하세요");
+  list.add(mem);
+
+  request.setAttribute("list" , list);
+%>
+
+  <%
+    for (int i = 0; i < list.size(); i++) {
+      MemberDto m = list.get(i);
+
+    }
+    for(MemberDto m : list){
+
+    }
+  %>
+
+  <c:forEach begin="0" end="2" var="m" items="${list }" varStatus="i">
+    <p> index:<c:out value="${i.index }"/> </p>
+    <p> data:<c:out value="${m.message }"/> </p>
+  </c:forEach>
+
+  <!-- Map-->
+
+  <%
+    Map<String , String> map = new HashMap<>();
+
+    map.put("apple", "사과");
+    map.put("banana", "바나나");
+    map.put("lemon", "레몬");
+
+    request.setAttribute("map", map);
+  %>
+
+  <c:forEach var="obj" items="${map }">
+    key:<c:out value="${obj.key }"/>
+    value:<c:out value="${obj.value }"/>
+  </c:forEach>
+
+  </body>
+</html>
